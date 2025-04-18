@@ -341,11 +341,11 @@ end)
 -- Credits
 cred:Seperator("Credits")
 cred:Button("YouTube", function()
-    setclipboard('https://www.youtube.com/@SGXR_Clan')
+    setclipboard('https://www.youtube.com/@MoonLight_H3LL')
 end)
 
 cred:Button("Discord", function()
-    setclipboard("https://discord.gg/822wEuEmmxe")
+    setclipboard("https://discord.gg/jnn6eyNrBX")
 end)
 
 cred:Button("My Site", function()
