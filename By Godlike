@@ -1,0 +1,353 @@
+local Update = loadstring(game:HttpGet("https://you.whimper.xyz/sources/relzhub/dep/pc.lua"))()
+local Library = Update:Window("Ninja Legends")
+local main = Library:Tab("Main", "rbxassetid://6026568198")
+local farm = Library:Tab("Auto Farm", "rbxassetid://7044284832")
+local tp = Library:Tab("Teleport", "rbxassetid://6035190846")
+local egg = Library:Tab("Crystal", "rbxassetid://6031265976")
+local misc = Library:Tab("Misc", "rbxassetid://6034509993")
+local cred = Library:Tab("Credits", "rbxassetid://7743867811")
+
+-- Time display
+local TimeLabel = main:Label("Executer Time")
+
+function UpdateTime()
+    local GameTime = math.floor(workspace.DistributedGameTime + 0.5)
+    local Hour = math.floor(GameTime / (60^2)) % 24
+    local Minute = math.floor(GameTime / (60^1)) % 60
+    local Second = math.floor(GameTime / (60^0)) % 60
+    TimeLabel:Set("[GameTime] : Hours : " .. Hour .. " Minutes : " .. Minute .. " Seconds : " .. Second)
+end
+
+spawn(function()
+    while task.wait() do
+        pcall(UpdateTime)
+    end
+end)
+
+-- FPS display
+local ClientLabel = main:Label("Client")
+
+function UpdateClient()
+    local Fps = workspace:GetRealPhysicsFPS()
+    ClientLabel:Set("[Fps] : " .. Fps)
+end
+
+spawn(function()
+    while true do
+        wait(0.1)
+        UpdateClient()
+    end
+end)
+
+-- Ping display
+local PingLabel = main:Label("Ping")
+
+function UpdatePing()
+    local Ping = game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValueString()
+    PingLabel:Set("[Ping] : " .. Ping)
+end
+
+spawn(function()
+    while true do
+        wait(0.1)
+        UpdatePing()
+    end
+end)
+
+main:Label("Join My Discord For More Info!")
+
+main:Button("Copy Discord Link", function()
+    setclipboard("https://discord.gg/rHCBZHWN")
+end)
+
+main:Seperator("Main")
+
+main:Button("Disable Trading", function()
+    local args = { "disableTrading" }
+    game:GetService("ReplicatedStorage").rEvents.tradingEvent:FireServer(unpack(args))
+end)
+
+main:Button("Enable Trading", function()
+    local args = { "enableTrading" }
+    game:GetService("ReplicatedStorage").rEvents.tradingEvent:FireServer(unpack(args))
+end)
+
+-- Player List Dropdown
+local PLIST = {}
+for _, v in pairs(game:GetService("Players"):GetPlayers()) do
+    table.insert(PLIST, v.DisplayName)
+end
+
+local TpPlayer
+
+main:Dropdown("Select Player", PLIST, false, function(value)
+    TpPlayer = value
+end)
+
+main:Button("Teleport To Player", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players[TpPlayer].Character.HumanoidRootPart.CFrame * CFrame.new(0, 20, 1)
+end)
+
+main:Slider("Speed", 0, 1000, 16, function(v)
+    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = v
+end)
+
+main:Slider("Jump", 0, 1000, 50, function(v)
+    game.Players.LocalPlayer.Character.Humanoid.JumpPower = v
+end)
+
+-- Auto Farm
+farm:Seperator("Auto Farm")
+farm:Toggle("Auto Swing", false, "Auto Farm Ninjitsu", function(state)
+    _G.swing = state
+    wait()
+    while _G.swing do
+        wait()
+        local args = { "swingKatana" }
+        game:GetService("Players").LocalPlayer.ninjaEvent:FireServer(unpack(args))
+    end
+end)
+
+farm:Toggle("Auto Sell", false, "Auto Sell Ninjitsu", function(state)
+    _G.sell = state
+    wait()
+    while _G.sell do
+        wait()
+        game.workspace.sellAreaCircles["sellAreaCircle15"].circleInner.CFrame = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart").CFrame
+        wait()
+        game.workspace.sellAreaCircles["sellAreaCircle15"].circleInner.CFrame = game.Workspace.Part.CFrame
+    end
+end)
+
+farm:Toggle("Auto Sell When Full", false, "Auto Sell Ninjitsu when full", function(state)
+    _G.sellWhenFull = state
+    wait()
+    while _G.sellWhenFull do
+        wait()
+        if game.Players.LocalPlayer.PlayerGui.gameGui.maxNinjitsuMenu.Visible then
+            game.workspace.sellAreaCircles["sellAreaCircle15"].circleInner.CFrame = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart").CFrame
+            wait()
+            game.workspace.sellAreaCircles["sellAreaCircle15"].circleInner.CFrame = game.Workspace.Part.CFrame
+        end
+    end
+end)
+
+-- Auto Buy Features
+farm:Toggle("Auto Buy Sword", false, "Auto Buy All Swords", function(state)
+    _G.buySword = state
+    wait()
+    while _G.buySword do
+        wait()
+        local args = { "buyAllSwords", "Blazing Vortex Island" }
+        game:GetService("Players").LocalPlayer.ninjaEvent:FireServer(unpack(args))
+    end
+end)
+
+farm:Toggle("Auto Buy Belts", false, "Auto Buy All Belts", function(state)
+    _G.buyBelt = state
+    wait()
+    while _G.buyBelt do
+        wait()
+        local args = { "buyAllBelts", "Blazing Vortex Island" }
+        game:GetService("Players").LocalPlayer.ninjaEvent:FireServer(unpack(args))
+    end
+end)
+
+farm:Toggle("Auto Buy Skills", false, "Auto Buy All Skills", function(state)
+    _G.buySkills = state
+    wait()
+    while _G.buySkills do
+        wait()
+        local args = { "buyAllSkills", "Blazing Vortex Island" }
+        game:GetService("Players").LocalPlayer.ninjaEvent:FireServer(unpack(args))
+    end
+end)
+
+farm:Toggle("Auto Buy Ranks", false, "Auto Buy Rank when meet prerequisites", function(state)
+    _G.buyRanks = state
+    wait()
+    while _G.buyRanks do
+        wait()
+        local oh1 = "buyRank"
+        local oh2 = game:GetService("ReplicatedStorage").Ranks.Ground:GetChildren()
+        for i = 1, #oh2 do
+            game:GetService("Players").LocalPlayer.ninjaEvent:FireServer(oh1, oh2[i].Name)
+        end
+    end
+end)
+
+farm:Toggle("Auto Buy Shurikens", false, "Auto Buy All Shurikens", function(state)
+    _G.buyShurikens = state
+    wait()
+    while _G.buyShurikens do
+        wait()
+        local args = { "buyAllShurikens", "Blazing Vortex Island" }
+        game:GetService("Players").LocalPlayer.ninjaEvent:FireServer(unpack(args))
+    end
+end)
+
+farm:Toggle("Auto Farm Chi", false, "Auto Teleport to Chi", function(state)
+    _G.farmChi = state
+    wait()
+    while _G.farmChi do
+        wait()
+        for _, v in pairs(game.Workspace.spawnedCoins.Valley:GetChildren()) do
+            if v.Name == "Blue Chi Crate" then 
+                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(v.Position)
+                wait(0.3)
+            end
+        end
+    end
+end)
+
+farm:Toggle("Auto Farm Coin", false, "Auto Teleport to Coin", function(state)
+    _G.farmCoin = state
+    wait()
+    while _G.farmCoin do
+        wait()
+        for _, v in pairs(game.Workspace.spawnedCoins.Valley:GetChildren()) do
+            if v.Name == "Purple Coin Crate" then 
+                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(v.Position)
+                wait(0.3)
+            end
+        end
+    end
+end)
+
+farm:Toggle("Auto Hoops", false, "Auto Hoops", function(state)
+    _G.hoops = state
+    wait()
+    while _G.hoops do
+        wait()
+        local plr = game.Players.LocalPlayer
+        for _, v in pairs(workspace.Hoops:GetDescendants()) do
+            if v.ClassName == "MeshPart" then
+                v.touchPart.CFrame = plr.Character.HumanoidRootPart.CFrame
+            end
+        end
+    end
+end)
+
+-- Teleportation Features
+local ISLAND = {}
+for _, v in pairs(game.workspace.islandUnlockParts:GetChildren()) do
+    table.insert(ISLAND, v.Name)
+end
+
+tp:Seperator("Island")
+tp:Dropdown('Teleports', ISLAND, false, function(selectedIsland)
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Workspace.islandUnlockParts[selectedIsland].islandSignPart.CFrame
+end)
+
+tp:Button("Unlock All Island", function()
+    for _, v in next, game.workspace.islandUnlockParts:GetChildren() do 
+        if v then 
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v.islandSignPart.CFrame
+            wait(0.2)
+        end
+    end
+end)
+
+-- Crystal Features
+egg:Seperator("Crystal")
+
+local Crystal = {}
+for _, v in pairs(game.workspace.mapCrystalsFolder:GetChildren()) do 
+    table.insert(Crystal, v.Name)
+end
+
+egg:Dropdown('Select Crystal', Crystal, false, function(value)
+    _G.cryEgg = value
+end)
+
+egg:Toggle("Open Crystal", false, "Auto Open Selected Crystal", function(state)
+    _G.cCry = state
+    wait()
+    while _G.cCry do
+        wait()
+        local args = { "openCrystal", _G.cryEgg }
+        game:GetService("ReplicatedStorage").rEvents.openCrystalRemote:InvokeServer(unpack(args))
+    end
+end)
+
+egg:Toggle("Auto Evolve Pet", "Auto Evolve All Pets", false, function(state)
+    _G.ePet = state
+    wait()
+    while _G.ePet do
+        wait()
+        for _, v in pairs(game:GetService("Players").LocalPlayer.petsFolder:GetChildren()) do
+            for _, x in pairs(v:GetChildren()) do
+                local args = { "evolvePet", x.Name }
+                game:GetService("ReplicatedStorage").rEvents.petEvolveEvent:FireServer(unpack(args))
+            end
+        end
+    end
+end)
+
+--- Miscellaneous Features
+misc:Seperator("Misc")
+
+misc:Toggle("Inf Double Jump", false, "Unlimited Double Jump", function(state)
+    _G.iJump = state
+    if _G.iJump then
+        game.Players.LocalPlayer.multiJumpCount.Value = "99999999999999999"
+    end
+end)
+
+misc:Button("Get All Elements", function()
+    local elements = {
+        "Frost", "Inferno", "Lightning", "Electral Chaos",
+        "Masterful Wrath", "Shadow Charge", "Shadowfire", "Eternity Storm", "Blazing Entity"
+    }
+    for _, element in ipairs(elements) do
+        game.ReplicatedStorage.rEvents.elementMasteryEvent:FireServer(element)
+    end
+end)
+
+main:Toggle("Disable PopUp Coin & Chi", false, "Hide Popup", function(state)
+    _G.PopUp = state
+    local playerGui = game:GetService("Players").LocalPlayer.PlayerGui
+    playerGui.statEffectsGui.Enabled = not playerGui.statEffectsGui.Enabled
+    playerGui.hoopGui.Enabled = not playerGui.hoopGui.Enabled
+end)
+
+main:Toggle("Invisibility", false, "Invisibility Character", function(state)
+    _G.invis = state
+    wait()
+    while _G.invis do
+        wait()
+        local args = { "goInvisible" }
+        local Event = game.Players.LocalPlayer.ninjaEvent
+        Event:FireServer(unpack(args))
+    end
+end)
+
+misc:Toggle("Inf Jump", false, "Unlimited Jump", function(state)
+    _G.iJumps = state
+    local InfiniteJumpEnabled = true
+    game:GetService("UserInputService").JumpRequest:connect(function()
+        if InfiniteJumpEnabled then
+            game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass('Humanoid'):ChangeState("Jumping")
+        end
+    end)
+end)
+
+misc:Button("Rejoin", function()
+    local ts = game:GetService("TeleportService")
+    local p = game:GetService("Players").LocalPlayer
+    ts:Teleport(game.PlaceId, p)
+end)
+
+-- Credits
+cred:Seperator("Credits")
+cred:Button("YouTube", function()
+    setclipboard('https://www.youtube.com/@SGXR_Clan')
+end)
+
+cred:Button("Discord", function()
+    setclipboard("https://discord.gg/822wEuEmmxe")
+end)
+
+cred:Button("My Site", function()
+    setclipboard("https://relzscript.com")
+end)
